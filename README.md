@@ -1,162 +1,122 @@
 # Headroom.js
 
-> Maintained fork by [JHCodeQuest](https://github.com/JHCodeQuest), based on
-> [WickyNilliams/headroom.js](https://github.com/WickyNilliams/headroom.js) 0.12.0.
-> This is an independent maintenance update, not an official upstream release.
-> Original MIT authorship and the existing runtime API are preserved.
+Hide a header while scrolling down and reveal it while scrolling up. Headroom
+changes CSS classes; your stylesheet controls how the header looks and moves.
+The core has no runtime dependencies.
 
-This revision adds native ESM and TypeScript declarations alongside the existing
-UMD/CommonJS builds, updates the development toolchain, and makes lifecycle
-cleanup safe before deferred initialisation and when called repeatedly.
+This is [JHCodeQuest's maintained fork](https://github.com/JHCodeQuest/headroom.js),
+based on [WickyNilliams/headroom.js](https://github.com/WickyNilliams/headroom.js)
+0.12.0. Original MIT authorship is preserved. It is an independent maintenance
+update, not an official upstream release.
 
-Headroom.js is a lightweight, high-performance JS widget (with no dependencies) that allows you to react to the user's scroll. The header on [this site](http://wicky.nillia.ms/headroom.js) is a living example, it slides out of view when scrolling down and slides back in when scrolling up.
+## Build and try this fork
 
-## Installation
-
-Clone and build this maintained fork with Node 22.13+, 24 or 26+:
+Use Node **22.13+, 24, or 26+** for development:
 
 ```bash
 git clone https://github.com/JHCodeQuest/headroom.js.git
 cd headroom.js
 npm ci
 npm run build
+npm run demo
 ```
 
-This fork has not been published to npm. `npm install headroom.js` and existing
-CDN URLs resolve upstream, not these changes. The package remains marked private
-to prevent accidental publication under the upstream name. The generated files are:
+Open `http://127.0.0.1:3333`. The TypeScript example lets you scroll, disable the
+widget and re-enable it. Its server binds only to loopback. Set `PORT` to use
+another local port.
 
-- `dist/headroom.js` and `dist/headroom.min.js`: legacy UMD/CommonJS builds.
-- `dist/headroom.mjs`: native ESM, selected by the package's import entry point.
-- `dist/headroom.d.ts`, `.d.mts`, `.d.cts`: declarations for the respective consumers.
+**This fork is not published to npm.** `npm install headroom.js` and existing
+upstream CDN URLs do not contain our changes. To use this fork in another
+application, follow the [installation and module examples](docs/INSTALLATION.md).
 
-No runtime dependencies have been added. The jQuery and AngularJS source adapters
-are retained; modern framework wrappers are outside this revision's scope.
+## Quick start in a consumer application
 
-## Documentation
-
-See the [maintenance notes](docs/MAINTENANCE.md) for changes, validation and known
-limits. The [upstream website](https://wicky.nillia.ms/headroom.js/) remains a
-reference for the original API.
-
-## Quick start
-
-After installing `headroom.js`. The following JS will create and initialise a headroom instance:
+After installing the locally packed fork as described in the installation guide,
+use this in a browser application with a bundler:
 
 ```js
 import Headroom from "headroom.js";
 
-// select your header or whatever element you wish
 const header = document.querySelector("header");
+if (header && Headroom.cutsTheMustard) {
+  const headroom = new Headroom(header, {
+    offset: { up: 60, down: 100 },
+    tolerance: { up: 5, down: 5 }
+  }).init();
 
-const headroom = new Headroom(header);
-headroom.init();
+  // In a component, also call destroy() when the component unmounts.
+  window.addEventListener("pagehide", event => {
+    if (!event.persisted) headroom.destroy();
+  });
+}
 ```
 
-Then you can add the following CSS to your page:
+Include the corresponding CSS:
 
 ```css
-.headroom {
-  will-change: transform;
-  transition: transform 200ms linear;
-}
-.headroom--pinned {
-  transform: translateY(0%);
-}
-.headroom--unpinned {
-  transform: translateY(-100%);
-}
+header { position: fixed; inset: 0 0 auto; }
+.headroom { will-change: transform; transition: transform 200ms linear; }
+.headroom--pinned { transform: translateY(0); }
+.headroom--unpinned { transform: translateY(-100%); }
+header:focus-within { transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
-  .headroom {
-    transition: none;
-  }
+  .headroom { transition: none; }
 }
 ```
 
-You should now see your header slide in and out in response to the user's scroll.
+`init()` adds the initial class immediately and starts tracking after about
+100 ms. Call `destroy()` when the element is no longer needed. Early and repeated
+destruction is safe. See the [lifecycle and method reference](docs/API.md#lifecycle)
+for details, including re-initialisation and freeze behaviour.
 
-Call `headroom.destroy()` when the element is unmounted or no longer needed.
-It cancels deferred setup, removes scroll listeners and pending animation work,
-and removes Headroom classes. It is safe before `init()`, immediately after it,
-and on repeated calls. The same instance can be initialised again.
+## Documentation and status
 
-### TypeScript example
+- [Current API](docs/API.md): options, classes, callbacks, methods and lifecycle.
+- [Installation](docs/INSTALLATION.md): packed dependency, ESM, CommonJS,
+  classic scripts, TypeScript and local example.
+- [Planned work and migration](docs/ROADMAP.md): requested changes and testing prerequisites.
+- [Maintenance evidence](docs/MAINTENANCE.md) and [security review](docs/SECURITY-REVIEW.md).
+- [Public project board](https://github.com/users/JHCodeQuest/projects/7/views/1)
+  and [issues](https://github.com/JHCodeQuest/headroom.js/issues).
 
-After building, run:
+Current code retains callbacks and the `pin`/`unpin` API. Element events,
+`up`/`down` naming, dynamic configuration, pin-only freeze and framework/virtual
+scroll integrations are planned work. Legacy jQuery and AngularJS adapter source
+is retained but is not built or verified as a supported integration.
 
-```bash
-npm run demo
-```
+## Development and verification
 
-Open `http://127.0.0.1:3333`. Scroll down and up, then use the button to disable
-and re-enable the widget. The example uses native ESM, strict TypeScript,
-keyboard-focus styling and reduced-motion CSS. Only the demo and its ESM bundle
-are served, on the loopback interface. Set `PORT` to choose another local port.
-
-## Contributions & Issues
-
-Contributions are welcome. Please clearly explain the purpose of the PR and follow the current code style.
-
-Issues can be resolved quickest if they are descriptive and include both a reduced test case and a set of steps to reproduce.
-
-## Contributing Guide
-
-### Setup
-
-The following steps will get you setup to contribute changes to this repo:
-
-1. Fork [this maintained repository](https://github.com/JHCodeQuest/headroom.js).
-2. Clone your fork locally
+Chrome must be installed for the browser suite. From the checkout:
 
 ```bash
-git clone https://github.com/<your_github_username>/headroom.js.git
-cd headroom.js
-```
-
-3. Install dependencies. This repo uses `npm`, so you should too.
-
-Development requires Node 22.13+ or 24 (also supports Node 26+) and an installed
-Chrome browser for the browser suite. Node 24 was used for local verification.
-
-```bash
-npm ci
-```
-
-### Building
-
-To build the project:
-
-```bash
-npm run build
-```
-
-To build and open the interactive Cypress test runner:
-
-```bash
-npm start
-```
-
-### Testing
-
-To run the test suite in headless mode:
-
-```bash
-npm test
-```
-
-`npm test` builds the bundles and example, tests server-side package imports,
-checks strict ESM/CommonJS TypeScript consumers, and runs the original browser
-behaviour tests plus lifecycle and ESM-example regressions in Chrome.
-
-```bash
-npm run lint
 npm run check
-npm pack --dry-run
 ```
 
-The workflow repeats `npm run check` on Node 22 and 24. Remote CI and browser
-platforms other than those actually run locally remain unverified.
+This runs lint, builds the bundles and TypeScript example, checks CommonJS/ESM
+imports and strict type consumers, then runs the Chrome browser tests.
+`npm start` builds and opens the interactive Cypress runner.
 
-## License
+The maintenance baseline at
+[`777cd46`](https://github.com/JHCodeQuest/headroom.js/commit/777cd46797052881c09c8cb8340da998d811ff06)
+passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39442262856),
+including 21 Chrome tests and two package-import tests. Local baseline checks ran
+on Windows with Node 24 and Chrome. This evidence is specific to that revision;
+check the current PR's CI for later changes. Firefox, Safari and physical iOS
+remain unverified. Node requirements describe development tooling, not a promise
+of equivalent browser support.
 
-Licensed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
+## Contributing
+
+Work from a branch of [this fork](https://github.com/JHCodeQuest/headroom.js).
+Include a reduced reproduction for bugs and run the affected checks before
+`npm run check`. Keep framework integrations optional and preserve shared core logic.
+
+Implementation PRs should describe their verified behaviour and use a closing
+reference such as `Closes #1` for the task they complete. Merging into `master`
+allows GitHub to close the linked issue; the project's enabled completion
+workflows move completed items to **Done**. Closing a PR without merging is not
+evidence that its task is complete.
+
+## Licence
+
+[MIT](LICENSE), retaining Nick Williams and the original contributors' attribution.
