@@ -1,50 +1,67 @@
 # Maintained fork
 
-This repository maintains the existing Headroom.js 0.12 API. It is based on
+This repository maintains the Headroom.js 0.12 API, based on
 [upstream](https://github.com/WickyNilliams/headroom.js) commit `0f53fc7`.
-The original MIT licence and authorship are retained.
+The original MIT licence and authorship are retained. The [API guide](API.md)
+documents current behaviour; the [roadmap](ROADMAP.md) describes proposed work.
 
-## Changes in this update
+## Maintenance baseline
 
-- Current Rollup, ESLint, Cypress and TypeScript development tools, with an npm lockfile.
-- Native ESM and strict TypeScript declarations, preserving CommonJS/UMD and legacy bundle paths.
-- Safe cleanup before initialisation, during the deferred setup window, and on repeated calls.
+- Updated Rollup, ESLint, Cypress and TypeScript development tools, with an npm lockfile.
+- Native ESM and strict TypeScript declarations, preserving CommonJS/UMD and legacy core bundle paths.
+- Safe cleanup before initialisation, during deferred setup, and on repeated calls.
 - Cancellation of pending setup and animation work, with listener removal on destruction.
 - Callback-triggered destruction/re-initialisation cannot finish an obsolete state update.
-- A runnable TypeScript example with explicit lifecycle cleanup and reduced-motion CSS.
-- Read-only CI on Node 22 and 24, with actions pinned to verified release commits.
+- Runnable TypeScript example with lifecycle cleanup and reduced-motion CSS.
+- Read-only CI on Node 22 and 24, with actions pinned to release commits.
 
-There are no runtime dependencies. The upstream npm package name is unchanged
-for compatibility, but `private: true` prevents accidental npm publication.
-There is no published npm version, hosted demo or new version tag for this update.
+There are no runtime dependencies. The upstream npm package name and version
+are retained for compatibility, but `private: true` prevents accidental npm
+publication. This maintenance update has no published npm release, hosted demo
+or new version tag. Use the [local package installation guide](INSTALLATION.md)
+to consume this fork rather than the upstream registry package.
+
+The documentation update covers installation, the actual options and lifecycle,
+adapter limitations, planned migrations and testing prerequisites. It does not
+implement the roadmap or change runtime behaviour.
 
 ## Upstream report triage
 
-The upstream open issue list was inspected on 20 October 2026. These statuses
+The upstream open issues were inspected on 20 October 2026. These statuses
 describe this fork; they do not close issues in the upstream project.
 
-| Upstream report | Status in this fork |
+| Upstream report | Status and follow-up in this fork |
 | --- | --- |
-| [#367: early destroy exception](https://github.com/WickyNilliams/headroom.js/issues/367) | Fixed with browser regressions covering the deferred setup window. |
-| [#377: directional offset classes](https://github.com/WickyNilliams/headroom.js/issues/377) | Not reproduced in current Chrome. Both offset orderings have explicit browser coverage; no speculative runtime change made. |
-| [#361: changing offsets dynamically](https://github.com/WickyNilliams/headroom.js/issues/361) | Reconfiguration API not added. Destroy the old instance and create a new one with the desired options. |
-| [#393: partially freezing state](https://github.com/WickyNilliams/headroom.js/issues/393) | Feature request deferred. Existing freeze behaviour still freezes all scroll-driven state. |
-| [#396: Locomotive Scroll](https://github.com/WickyNilliams/headroom.js/issues/396) | Virtual-scroll integration is outside this update. The scroller must expose native scroll position and events. |
-| [#333: Angular directive](https://github.com/WickyNilliams/headroom.js/issues/333) | Legacy adapter source retained, unverified; no Angular 2+ component is provided. |
-| [#140: jQuery modules](https://github.com/WickyNilliams/headroom.js/issues/140) | Legacy adapter source retained, unverified; no adapter packaging changes are claimed. |
-| [#255: React component](https://github.com/WickyNilliams/headroom.js/issues/255) | No framework wrapper added. Core setup/cleanup can be integrated with a component's mount/unmount lifecycle. |
-| [#307](https://github.com/WickyNilliams/headroom.js/issues/307), [#278](https://github.com/WickyNilliams/headroom.js/issues/278), [#271](https://github.com/WickyNilliams/headroom.js/issues/271): older iOS behaviours | Unverified. Physical iOS testing is required before claiming a fix. |
-| [#347](https://github.com/WickyNilliams/headroom.js/issues/347), [#102](https://github.com/WickyNilliams/headroom.js/issues/102): API redesign | Deferred; this update preserves the 0.12 constructor, methods, classes and callbacks. |
+| [#367: early destroy exception](https://github.com/WickyNilliams/headroom.js/issues/367) | Fixed with browser regressions covering deferred setup and repeated cleanup. |
+| [#377: directional offset classes](https://github.com/WickyNilliams/headroom.js/issues/377) | Not reproduced in current Chrome; both offset orderings have coverage. Investigation remains tracked in [#21](https://github.com/JHCodeQuest/headroom.js/issues/21). |
+| [#361: dynamic offsets](https://github.com/WickyNilliams/headroom.js/issues/361) | No reconfiguration API yet; destroy/recreate with new options. Planned in [#10](https://github.com/JHCodeQuest/headroom.js/issues/10). |
+| [#393: partial freeze](https://github.com/WickyNilliams/headroom.js/issues/393) | Freeze still stops all scroll-driven states. Pin-only freeze is planned in [#8](https://github.com/JHCodeQuest/headroom.js/issues/8). |
+| [#396: Locomotive Scroll](https://github.com/WickyNilliams/headroom.js/issues/396) | Native scroll events/position remain required. Integration planned in [#9](https://github.com/JHCodeQuest/headroom.js/issues/9). |
+| [#333: Angular directive](https://github.com/WickyNilliams/headroom.js/issues/333) | Legacy AngularJS adapter source retained, unverified. Reproduction in [#20](https://github.com/JHCodeQuest/headroom.js/issues/20); modern Angular work is separate in [#15](https://github.com/JHCodeQuest/headroom.js/issues/15). |
+| [#140: jQuery modules](https://github.com/WickyNilliams/headroom.js/issues/140) | Legacy adapter source retained, without a supported current build. Strategy [#6](https://github.com/JHCodeQuest/headroom.js/issues/6) and module bug [#19](https://github.com/JHCodeQuest/headroom.js/issues/19) remain planned. |
+| [#255: React](https://github.com/WickyNilliams/headroom.js/issues/255) | No packaged wrapper; optional integration planned in [#18](https://github.com/JHCodeQuest/headroom.js/issues/18). |
+| [#307](https://github.com/WickyNilliams/headroom.js/issues/307), [#278](https://github.com/WickyNilliams/headroom.js/issues/278), [#271](https://github.com/WickyNilliams/headroom.js/issues/271): older iOS behaviours | Unverified. Reproduction and Simulator/device validation are tracked in [#16](https://github.com/JHCodeQuest/headroom.js/issues/16); the Mac/Xcode environment blocker is [#13](https://github.com/JHCodeQuest/headroom.js/issues/13). |
+| [#347](https://github.com/WickyNilliams/headroom.js/issues/347), [#102](https://github.com/WickyNilliams/headroom.js/issues/102): API redesign | This fork preserves constructor, methods, classes and callbacks. Proposed changes and their dependencies are in the [roadmap](ROADMAP.md). |
 
-## Validation and limits
+## Verification evidence
 
-Run `npm ci` and `npm run check` with supported Node and an installed Chrome.
-The check builds all artifacts, runs package-import and strict type checks,
-then tests scroll direction, both offset orderings, tolerance, callbacks, freeze,
+Run `npm ci` and `npm run check` with supported Node and installed Chrome.
+The check lints, builds all artifacts, runs two package-import tests and strict
+ESM/CommonJS type-consumer checks, then runs 21 Chrome browser tests. Coverage
+includes scroll direction, both offset orderings, tolerance, callbacks, freeze,
 custom containers, iframe windows, lifecycle cleanup and the ESM example.
 
-Local verification uses Windows, Node 24 and Chrome. GitHub Actions separately
-checks Linux on Node 22 and 24; only a successful run for the exact commit is
-evidence for those environments. Safari, Firefox and physical mobile devices
-are not covered by these checks. This update does not claim every historical
-upstream report is fixed. See [the security review](SECURITY-REVIEW.md) for its scope.
+The baseline revision
+[`777cd46`](https://github.com/JHCodeQuest/headroom.js/commit/777cd46797052881c09c8cb8340da998d811ff06)
+passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39442262856).
+Local baseline checks used Windows, Node 24 and Chrome. These results apply to
+that revision; use the current PR's check results for subsequent changes.
+
+Firefox, Safari and physical mobile devices remain unverified. Browser policy
+is planned in [#7](https://github.com/JHCodeQuest/headroom.js/issues/7). Development
+Node versions do not define browser support. Follow the
+[mobile validation plan](ROADMAP.md#mobile-validation-plan) before claiming an
+iOS fix; desktop emulation does not replace Simulator/device evidence.
+
+The [security review](SECURITY-REVIEW.md) records its baseline scope and limits.
+It is not a security guarantee or evidence that every historical report is fixed.
