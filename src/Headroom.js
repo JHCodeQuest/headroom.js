@@ -23,6 +23,7 @@ function Headroom(elem, options) {
   this.offset = normalizeUpDown(this.offset);
   this.initialised = false;
   this.frozen = false;
+  this.generation = 0;
 }
 Headroom.prototype = {
   constructor: Headroom,
@@ -33,18 +34,22 @@ Headroom.prototype = {
    */
   init: function() {
     if (Headroom.cutsTheMustard && !this.initialised) {
+      this.generation++;
       this.addClass("initial");
       this.initialised = true;
 
       // defer event registration to handle browser
       // potentially restoring previous scroll position
-      setTimeout(
+      this.initTimeout = setTimeout(
         function(self) {
+          self.initTimeout = null;
           self.scrollTracker = trackScroll(
             self.scroller,
             { offset: self.offset, tolerance: self.tolerance },
             self.update.bind(self)
           );
+          // Store the tracker before callbacks run: a callback may destroy us.
+          self.scrollTracker.update();
         },
         100,
         this
@@ -59,9 +64,15 @@ Headroom.prototype = {
    * @public
    */
   destroy: function() {
+    this.generation++;
+    clearTimeout(this.initTimeout);
+    this.initTimeout = null;
     this.initialised = false;
     Object.keys(this.classes).forEach(this.removeClass, this);
-    this.scrollTracker.destroy();
+    if (this.scrollTracker) {
+      this.scrollTracker.destroy();
+      this.scrollTracker = null;
+    }
   },
 
   /**
@@ -189,7 +200,8 @@ Headroom.prototype = {
   },
 
   update: function(details) {
-    if (details.isOutOfBounds) {
+    var generation = this.generation;
+    if (!this.initialised || details.isOutOfBounds) {
       // Ignore bouncy scrolling in OSX
       return;
     }
@@ -204,10 +216,19 @@ Headroom.prototype = {
       this.notTop();
     }
 
+    // Public callbacks may synchronously destroy the widget.
+    if (!this.initialised || this.generation !== generation) {
+      return;
+    }
+
     if (details.bottom) {
       this.bottom();
     } else {
       this.notBottom();
+    }
+
+    if (!this.initialised || this.generation !== generation) {
+      return;
     }
 
     if (this.shouldUnpin(details)) {

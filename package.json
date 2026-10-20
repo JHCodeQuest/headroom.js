@@ -7,11 +7,16 @@
     "dist"
   ],
   "scripts": {
-    "start": "rollup --config --watch & cypress open",
-    "test": "npm run build && cypress run",
-    "build": "rollup --config",
-    "version": "npm run build",
-    "postversion": "git push origin master --tags && npm publish"
+    "start": "npm run build && cypress open",
+    "test": "npm run build && npm run test:package && npm run test:types && npm run test:browser",
+    "build": "rollup --config rollup.config.mjs && node scripts/build-types.mjs && tsc -p examples/typescript/tsconfig.json",
+    "lint": "eslint .",
+    "test:browser": "cypress run --browser chrome",
+    "check": "npm run lint && npm test",
+    "test:package": "node --test test/package.test.mjs",
+    "test:types": "tsc -p test/types/tsconfig.json",
+    "prepack": "npm run build",
+    "demo": "node scripts/serve-demo.mjs"
   },
   "repository": {
     "type": "git",
@@ -30,13 +35,52 @@
     "url": "https://github.com/WickyNilliams/headroom.js/issues"
   },
   "devDependencies": {
-    "cypress": "^3.4.1",
-    "eslint": "^6.5.0",
-    "eslint-plugin-cypress": "^2.7.0",
-    "rollup": "^1.19.4",
-    "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-filesize": "^6.2.0",
-    "rollup-plugin-license": "^0.12.1",
-    "rollup-plugin-uglify": "^6.0.2"
+    "@eslint/js": "^10.0.1",
+    "@rollup/plugin-terser": "^1.0.0",
+    "cypress": "^16.2.0",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "rollup": "^4.64.12",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0 || >=26.0.0"
+  },
+  "private": true,
+  "module": "dist/headroom.mjs",
+  "types": "dist/headroom.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/headroom.d.mts",
+        "default": "./dist/headroom.mjs"
+      },
+      "require": {
+        "types": "./dist/headroom.d.cts",
+        "default": "./dist/headroom.js"
+      }
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json",
+    "./dist/headroom.js": {
+      "types": "./dist/headroom.d.cts",
+      "default": "./dist/headroom.js"
+    },
+    "./dist/headroom.min.js": {
+      "types": "./dist/headroom.d.cts",
+      "default": "./dist/headroom.min.js"
+    },
+    "./dist/headroom": {
+      "types": "./dist/headroom.d.cts",
+      "default": "./dist/headroom.js"
+    },
+    "./dist/headroom.min": {
+      "types": "./dist/headroom.d.cts",
+      "default": "./dist/headroom.min.js"
+    },
+    "./dist/headroom.mjs": {
+      "types": "./dist/headroom.d.mts",
+      "default": "./dist/headroom.mjs"
+    }
   }
 }

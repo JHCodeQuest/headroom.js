@@ -1,3 +1,7 @@
 node_modules
 dist/
 .vscode
+cypress/screenshots/
+cypress/videos/
+*.tgz
+examples/typescript/main.js

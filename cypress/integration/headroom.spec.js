@@ -6,7 +6,7 @@ describe("Headroom", function() {
       win.hr = new win.Headroom(win.document.querySelector("header"), options);
       win.hr.init();
     });
-    cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
+    cy.window().its("hr.scrollTracker").should("exist");
   };
 
   beforeEach(() => {
@@ -270,7 +270,6 @@ describe("Headroom", function() {
       }
     });
 
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(0).should(() => {
       expect(topStatus).to.equal("top");
       expect(pinStatus).to.equal(undefined);

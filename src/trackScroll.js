@@ -46,9 +46,8 @@ export default function trackScroll(element, options, callback) {
     : false;
 
   element.addEventListener("scroll", handleScroll, eventOptions);
-  update();
-
   return {
+    update: update,
     destroy: function() {
       cancelAnimationFrame(rafId);
       element.removeEventListener("scroll", handleScroll, eventOptions);

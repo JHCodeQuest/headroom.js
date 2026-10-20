@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Headroom.js · TypeScript example</title>
+    <script type="importmap">{"imports":{"headroom.js":"../../dist/headroom.mjs"}}</script>
+    <style>
+      :root { font-family: system-ui, sans-serif; color: #172d29; background: #f3f6ef; }
+      body { margin: 0; }
+      header { position: fixed; inset: 0 0 auto; background: #173d33; color: white; padding: 1.2rem 6vw; display: flex; justify-content: space-between; align-items: center; }
+      header a { color: inherit; }
+      .headroom { transition: transform 200ms ease; will-change: transform; }
+      .headroom--pinned { transform: translateY(0); }
+      .headroom--unpinned { transform: translateY(-100%); }
+      header:focus-within { transform: translateY(0); }
+      main { max-width: 64rem; padding: 10rem 6vw 4rem; margin: auto; }
+      h1 { font-size: clamp(3rem, 7vw, 6rem); letter-spacing: -.05em; line-height: 1.05; max-width: 12ch; margin: 1rem 0 2rem; }
+      p { font-size: 1.2rem; line-height: 1.7; max-width: 42rem; }
+      .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .8rem; }
+      button { font: inherit; border: 1px solid #173d33; padding: .8rem 1.2rem; border-radius: 2rem; background: transparent; cursor: pointer; }
+      section { padding: 3rem 0; border-top: 1px solid #cad4c4; min-height: 55vh; }
+      :focus-visible { outline: 3px solid #e87f43; outline-offset: 5px; }
+      @media (prefers-reduced-motion: reduce) { .headroom { transition: none; } }
+    </style>
+  </head>
+  <body>
+    <header><strong>Headroom.js</strong><a href="#details">How it works</a></header>
+    <main>
+      <p class="eyebrow">Local revival · Native ESM + TypeScript</p>
+      <h1>More room for your content.</h1>
+      <p>Scroll down to tuck the header away. Scroll up to bring it back. A small, dependency-free enhancement with the original Headroom API.</p>
+      <p><button id="toggle" type="button">Disable header behaviour</button></p>
+      <section id="details"><h2>A familiar API. A modern setup.</h2><p>This example imports the ES module, checks its options with TypeScript, and destroys the instance when the page is left. The button lets you test cleanup and re-initialisation.</p></section>
+      <section><h2>Designed to stay out of the way.</h2><p>The header responds to scroll direction. A tolerance of five pixels filters small movements, and a sixty-pixel offset keeps it visible near the top.</p></section>
+      <section><h2>Small details matter.</h2><p>Keyboard focus brings the header into view. The reduced-motion preference removes the slide transition.</p><a href="#">Back to the top</a></section>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

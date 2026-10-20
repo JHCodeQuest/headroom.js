@@ -18,7 +18,7 @@ export function passiveEventsSupported() {
     };
     window.addEventListener("test", options, options);
     window.removeEventListener("test", options, options);
-  } catch (err) {
+  } catch (_err) {
     supported = false;
   }
 
