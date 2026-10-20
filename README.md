@@ -1,8 +1,9 @@
 # Headroom.js
 
-> Local revival of upstream 0.12.0. This checkout is not an official upstream release.
-> It is marked private to prevent accidental npm publication. Original MIT
-> authorship and the existing runtime API are preserved.
+> Maintained fork by [JHCodeQuest](https://github.com/JHCodeQuest), based on
+> [WickyNilliams/headroom.js](https://github.com/WickyNilliams/headroom.js) 0.12.0.
+> This is an independent maintenance update, not an official upstream release.
+> Original MIT authorship and the existing runtime API are preserved.
 
 This revision adds native ESM and TypeScript declarations alongside the existing
 UMD/CommonJS builds, updates the development toolchain, and makes lifecycle
@@ -12,21 +13,18 @@ Headroom.js is a lightweight, high-performance JS widget (with no dependencies) 
 
 ## Installation
 
-Headroom.js is available on npm. To install:
+Clone and build this maintained fork with Node 22.13+, 24 or 26+:
 
 ```bash
-npm install headroom.js --save
-
-# or...
-yarn add headroom.js
+git clone https://github.com/JHCodeQuest/headroom.js.git
+cd headroom.js
+npm ci
+npm run build
 ```
 
-A a universal build (suitable for script tags, CommonJS, and AMD) is available from unpkg.com:
-
-[https://unpkg.com/headroom.js](https://unpkg.com/headroom.js)
-
-The npm/CDN commands above refer to upstream, not this local revision. To try
-this checkout, run `npm ci` and `npm run build`. The generated files are:
+This fork has not been published to npm. `npm install headroom.js` and existing
+CDN URLs resolve upstream, not these changes. The package remains marked private
+to prevent accidental publication under the upstream name. The generated files are:
 
 - `dist/headroom.js` and `dist/headroom.min.js`: legacy UMD/CommonJS builds.
 - `dist/headroom.mjs`: native ESM, selected by the package's import entry point.
@@ -37,7 +35,9 @@ are retained; modern framework wrappers are outside this revision's scope.
 
 ## Documentation
 
-For complete documentation please visit the [headroom.js website](http://wicky.nillia.ms/headroom.js).
+See the [maintenance notes](docs/MAINTENANCE.md) for changes, validation and known
+limits. The [upstream website](https://wicky.nillia.ms/headroom.js/) remains a
+reference for the original API.
 
 ## Quick start
 
@@ -105,7 +105,7 @@ Issues can be resolved quickest if they are descriptive and include both a reduc
 
 The following steps will get you setup to contribute changes to this repo:
 
-1. Fork the repo (click the <kbd>Fork</kbd> button at the top right of [this page](https://github.com/WickyNilliams/headroom.js))
+1. Fork [this maintained repository](https://github.com/JHCodeQuest/headroom.js).
 2. Clone your fork locally
 
 ```bash

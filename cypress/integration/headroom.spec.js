@@ -135,6 +135,19 @@ describe("Headroom", function() {
       .should("be.top");
   });
 
+  it("updates top classes when the upward offset exceeds the downward offset", () => {
+    initialiseHeadroom({ offset: { up: 150, down: 40 } });
+
+    cy.scrollTo(0, 100);
+    cy.get("header").should("not.be.top").should("not.be.pinned");
+    cy.scrollTo(0, 80);
+    cy.get("header").should("be.top").should("be.pinned");
+    cy.scrollTo(0, 100);
+    cy.get("header").should("not.be.top").should("not.be.pinned");
+    cy.scrollTo(0, 39);
+    cy.get("header").should("be.top").should("be.pinned");
+  });
+
   it("can be frozen / unfrozen", () => {
     initialiseHeadroom();
 
