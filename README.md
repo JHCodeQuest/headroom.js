@@ -9,6 +9,11 @@ based on [WickyNilliams/headroom.js](https://github.com/WickyNilliams/headroom.j
 0.12.0. Original MIT authorship is preserved. It is an independent maintenance
 update, not an official upstream release.
 
+**Breaking fork change:** state notifications now use element events instead of
+the upstream callback options. Existing callback consumers must follow the
+[migration guide](docs/API.md#migrating-callback-consumers). Baseline package
+metadata `0.12.0` does not imply callback compatibility; no npm release is claimed.
+
 ## Build and try this fork
 
 Use Node **22.13+, 24, or 26+** for development:
@@ -71,7 +76,7 @@ for details, including re-initialisation and freeze behaviour.
 
 ## Documentation and status
 
-- [Current API](docs/API.md): options, classes, callbacks, methods and lifecycle.
+- [Current API](docs/API.md): options, classes, element events, methods and lifecycle.
 - [Installation](docs/INSTALLATION.md): packed dependency, ESM, CommonJS,
   classic scripts, TypeScript and local example.
 - [Planned work and migration](docs/ROADMAP.md): requested changes and testing prerequisites.
@@ -81,9 +86,11 @@ for details, including re-initialisation and freeze behaviour.
 - [Public project board](https://github.com/users/JHCodeQuest/projects/7/views/1)
   and [issues](https://github.com/JHCodeQuest/headroom.js/issues).
 
-Current code retains callbacks and the `pin`/`unpin` API. Element events,
-`up`/`down` naming, dynamic configuration, pin-only freeze and framework/virtual
-scroll integrations are planned work. Legacy jQuery and AngularJS adapter source
+Current code emits six `headroom:*` events on its element; listen before `init()`
+and use `event.detail.headroom` for the instance. Callback options are rejected
+with migration guidance. The `pin`/`unpin` methods remain; `up`/`down` naming,
+dynamic configuration, pin-only freeze and framework/virtual scroll integrations
+are planned work. Legacy jQuery and AngularJS adapter source
 is retained but is not built or verified as a supported integration.
 
 Use the static boolean `Headroom.isSupported` for feature detection. The old
@@ -103,12 +110,17 @@ This runs lint, builds the bundles and TypeScript example, checks CommonJS/ESM
 imports and strict type consumers, then runs the Chrome browser tests.
 `npm start` builds and opens the interactive Cypress runner.
 
-The maintained runtime at
+The pre-event baseline runtime at
 [`a3eb455`](https://github.com/JHCodeQuest/headroom.js/commit/a3eb455a737a26e2731993e9862e1aefadcd2825)
 passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39452518979),
 including 24 Chrome tests and four package tests. Local Chrome checks also passed
 on Windows with Node 24. Evidence applies to the recorded revision/environment;
 check the current PR's CI for later changes.
+
+The element-event update passes the current 34 Chrome tests, five package tests,
+strict types, lint and build locally on Windows/Node 24. This is new evidence for
+the event API; the linked older Linux run does not verify the event changes.
+The same 34 browser regressions also pass in local Edge 155.
 
 Our rolling maintenance targets cover the latest two stable Chrome, Edge and
 Firefox desktop majors, current/previous Safari majors on supported macOS,

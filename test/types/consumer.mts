@@ -14,8 +14,7 @@ const options: Headroom.Options = {
   tolerance: { up: 2, down: 5 },
   offset: 40,
   scroller: window,
-  classes: { pinned: "header-visible" },
-  onPin() { this.freeze(); }
+  classes: { pinned: "header-visible" }
 };
 const instance: Headroom = new Headroom(element, options).init();
 instance.destroy();
@@ -25,3 +24,18 @@ new Headroom(element, { tolerance: "5" });
 new Headroom("header");
 // @ts-expect-error Custom classes must use a known state name.
 new Headroom(element, { classes: { unknown: "header" } });
+
+const onPin = (event: Headroom.EventMap["headroom:pin"]) => {
+  const owner: Headroom = event.detail.headroom;
+  owner.freeze();
+  // @ts-expect-error The event has no invented scroll-position payload.
+  event.detail.scrollY;
+};
+element.addEventListener("headroom:pin", onPin);
+element.removeEventListener("headroom:pin", onPin);
+document.addEventListener("headroom:not-top", event => {
+  const detail: Headroom.EventDetail = event.detail;
+  detail.headroom.destroy();
+});
+// @ts-expect-error Callback options were replaced by element events.
+new Headroom(element, { onPin() {} });

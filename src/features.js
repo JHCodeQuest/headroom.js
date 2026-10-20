@@ -32,6 +32,7 @@ export function isSupported() {
     "classList" in document.documentElement &&
     Object.assign &&
     Object.keys &&
-    typeof requestAnimationFrame === "function"
+    typeof requestAnimationFrame === "function" &&
+    typeof window.CustomEvent === "function"
   );
 }

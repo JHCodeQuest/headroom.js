@@ -11,8 +11,8 @@ Use the following rolling window when planning compatibility work:
 
 | Browser/platform | Target versions | Current coverage |
 | --- | --- | --- |
-| Chrome desktop on vendor-supported Windows, macOS and Linux | Latest two stable major browser versions. | Chrome 155 tested on Windows and Linux; macOS and the rest of the window unverified. |
-| Edge desktop on vendor-supported Windows, macOS and Linux | Latest two stable major browser versions. | Edge 155 passed 24 automated checks on Windows; manual checks and other combinations unverified. |
+| Chrome desktop on vendor-supported Windows, macOS and Linux | Latest two stable major browser versions. | Event update: 34 Chrome 155 checks passed on Windows. Linux evidence below predates that update; macOS and the rest of the window unverified. |
+| Edge desktop on vendor-supported Windows, macOS and Linux | Latest two stable major browser versions. | Event update: 34 Edge 155 checks passed on Windows; manual checks and other combinations unverified. |
 | Firefox desktop on vendor-supported Windows, macOS and Linux | Latest two stable major browser versions on the standard release channel. | Unverified; not installed in the current workspace. |
 | Safari on vendor-supported macOS | Current and previous stable Safari major versions, on macOS versions that can run them. | Unverified; an accessible Mac is required. |
 | Safari on iPhone/iOS | Current and previous stable iOS major releases, using their available Safari versions. | Blocked locally by [#13](https://github.com/JHCodeQuest/headroom.js/issues/13); Simulator/device checks required. |
@@ -44,6 +44,7 @@ environment and checks. It does not verify every version in a target row.
 | [`a3eb455`](https://github.com/JHCodeQuest/headroom.js/commit/a3eb455a737a26e2731993e9862e1aefadcd2825), Ubuntu 24.04, Chrome 155 (setup installed Chrome for Testing 155.0.8059.84), Node 22.23.3 and 24.22.0 | [Successful master CI](https://github.com/JHCodeQuest/headroom.js/actions/runs/39452518979): lint, build, four package tests, strict type checks and 24 browser tests in each job. | Headless desktop Chrome only; two Node jobs do not add another browser engine. Cypress reports the browser major; the setup step records the installed full version. |
 | Task #4 source `431c553`, Windows 11, Node 24.11, Chrome 155 | Local `npm run check` passed, including all 24 browser tests. | Recorded maintenance evidence; not a mobile, visual or accessibility certification. |
 | Task #7 documentation working tree based on `a3eb455` (runtime unchanged), Windows 11 Home 10.0.26300, Node 24.11.0, Edge 155.0.4283.62 stable | Local build and `npx --no-install cypress run --browser edge` passed all 24 existing browser tests. | Headless desktop automation only; visual/accessibility, physical-device and real cache-restoration checks not performed. |
+| Element-event working tree based on `1c45a25`, Windows 11, Node 24.11.0, Chrome 155.0.8059.85 and Edge 155.0.4283.62 | `npm run check` passed, including 34 Chrome tests and five package tests. The same 34 browser regressions plus four temporary packed-consumer documentation checks passed in Edge. | Runtime changed from the older baseline rows. Linux event-API CI is pending publication; mobile, visual and real cache-restoration checks remain unverified. |
 | Firefox, Safari, Android and iOS/iPadOS | No passing result claimed here until a run is recorded. | A configured tool, installed browser or true support flag is not a passing test. |
 
 The current [CI workflow](../.github/workflows/ci.yml) runs on `ubuntu-latest`
@@ -57,7 +58,8 @@ There is no Firefox, Edge, Safari, macOS or mobile CI job in this workflow.
 The browser core needs DOM elements and class manipulation, native scroll events,
 window or element scroll measurements, `Function.prototype.bind`, `Object.assign`,
 `Object.keys`, `Object.defineProperty`, `requestAnimationFrame` and
-`cancelAnimationFrame`. The passive-listener probe falls back to a boolean event
+`cancelAnimationFrame`, plus `CustomEvent` construction and element `dispatchEvent`.
+The passive-listener probe falls back to a boolean event
 option when options objects are unavailable. Page layout and CSS remain the
 consumer's responsibility.
 
@@ -113,11 +115,11 @@ a Safari result. Use actual Safari on an accessible Mac for the Safari matrix.
 Require both the automated regressions where supported and manual checks:
 
 - Verify down/up pin changes, both directional offset orderings, exact top/bottom
-  boundaries, tolerance, callbacks and frozen state. Match the current
+  boundaries, tolerance, element events and frozen state. Match the current
   [API contract](API.md), including the absence of an initial pinned class.
 - Exercise window, overflowing element and same-origin iframe scroll sources;
   confirm cleanup before/after deferred setup, repeated destruction,
-  re-initialisation and reentrant callbacks do not leave tracking behind.
+  re-initialisation and reentrant listeners do not leave tracking behind.
 - Load native ESM and classic UMD examples over HTTP; check the bundled consumer
   path and declaration/package checks. Confirm no unexpected console errors.
 - Check the actual application's header with keyboard focus, reduced motion,

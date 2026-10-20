@@ -41,12 +41,12 @@ describe("lifecycle cleanup", () => {
     cy.get("header").should("have.attr", "class", "");
   });
 
-  it("allows a callback to destroy the instance during initialisation", () => {
+  it("allows an event listener to destroy the instance during initialisation", () => {
     cy.window().then(win => {
       cy.spy(win, "removeEventListener").as("removeListener");
-      win.hr = new win.Headroom(win.document.querySelector("header"), {
-        onTop() { this.destroy(); }
-      }).init();
+      const header = win.document.querySelector("header");
+      header.addEventListener("headroom:top", event => event.detail.headroom.destroy());
+      win.hr = new win.Headroom(header).init();
     });
     cy.tick(100);
     cy.window().its("hr.initialised").should("equal", false);
@@ -73,19 +73,19 @@ describe("lifecycle cleanup", () => {
     cy.get("header").should("have.attr", "class", "");
   });
 
-  it("stops an old update when a callback destroys and re-initialises", () => {
+  it("stops an old update when a listener destroys and re-initialises", () => {
     cy.window().then(win => {
       let restarted = false;
-      win.hr = new win.Headroom(win.document.querySelector("header"), {
-        onTop() {
-          if (!restarted) {
-            restarted = true;
-            this.destroy();
-            this.init();
-          }
-        },
-        onNotBottom: cy.stub().as("notBottom")
-      }).init();
+      const header = win.document.querySelector("header");
+      header.addEventListener("headroom:top", event => {
+        if (!restarted) {
+          restarted = true;
+          event.detail.headroom.destroy();
+          event.detail.headroom.init();
+        }
+      });
+      header.addEventListener("headroom:not-bottom", cy.stub().as("notBottom"));
+      win.hr = new win.Headroom(header).init();
     });
     cy.tick(100);
     cy.get("header").should("have.attr", "class", "headroom");

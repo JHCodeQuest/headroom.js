@@ -29,9 +29,10 @@
     <main>
       <p class="eyebrow">Local revival · Native ESM + TypeScript</p>
       <h1>More room for your content.</h1>
-      <p>Scroll down to tuck the header away. Scroll up to bring it back. A small, dependency-free enhancement with the original Headroom API.</p>
+      <p>Scroll down to tuck the header away. Scroll up to bring it back. This fork uses element events for state notifications.</p>
       <p><button id="toggle" type="button">Disable header behaviour</button></p>
-      <section id="details"><h2>A familiar API. A modern setup.</h2><p>This example imports the ES module, checks its options with TypeScript, and destroys the instance when the page is left. The button lets you test cleanup and re-initialisation.</p></section>
+      <p id="header-state">Header tracking enabled</p>
+      <section id="details"><h2>Element events. A modern setup.</h2><p>This example imports the ES module and subscribes to header events with TypeScript. The button tests cleanup and re-initialisation. Page cleanup keeps cached pages working and removes subscriptions when the page is discarded.</p></section>
       <section><h2>Designed to stay out of the way.</h2><p>The header responds to scroll direction. A tolerance of five pixels filters small movements, and a sixty-pixel offset keeps it visible near the top.</p></section>
       <section><h2>Small details matter.</h2><p>Keyboard focus brings the header into view. The reduced-motion preference removes the slide transition.</p><a href="#">Back to the top</a></section>
     </main>
