@@ -11,7 +11,7 @@ ownership, progress, bugs, blockers and completion through linked issues and PRs
 | --- | --- | --- |
 | Documentation | Guides for the existing API and unpublished fork. | [#1](https://github.com/JHCodeQuest/headroom.js/issues/1): keep documentation aligned with verified behaviour. |
 | Initialisation | Constructor followed by `init()`; tracking starts after a 100 ms timer. | [#2](https://github.com/JHCodeQuest/headroom.js/issues/2): decide whether to make setup synchronous; [#3](https://github.com/JHCodeQuest/headroom.js/issues/3): evaluate a function API. |
-| Support detection | Static boolean `Headroom.isSupported`, with deprecated, synchronized `cutsTheMustard` alias. | [#4](https://github.com/JHCodeQuest/headroom.js/issues/4): additive naming migration implemented; [#7](https://github.com/JHCodeQuest/headroom.js/issues/7): browser support and validation policy remains planned. |
+| Support detection and policy | Static boolean `Headroom.isSupported`, with deprecated, synchronized `cutsTheMustard` alias; documented [browser/version policy](BROWSER-SUPPORT.md). | [#4](https://github.com/JHCodeQuest/headroom.js/issues/4): additive naming migration implemented; [#7](https://github.com/JHCodeQuest/headroom.js/issues/7): policy defined, with remaining platform verification explicitly pending. |
 | State notifications | Six instance callbacks. | [#5](https://github.com/JHCodeQuest/headroom.js/issues/5): replace callbacks with events emitted on the element. |
 | State naming | `pin`/`unpin` methods and pinned/unpinned classes. | [#22](https://github.com/JHCodeQuest/headroom.js/issues/22): plan the breaking `up`/`down` API change. |
 | Freeze | All scroll-driven state changes stop while frozen. | [#8](https://github.com/JHCodeQuest/headroom.js/issues/8): freeze pin state independently of top/not-top changes. |
@@ -64,8 +64,8 @@ See [Apple's Simulator documentation](https://developer.apple.com/documentation/
 For each report:
 
 1. Record the affected iOS/Safari version, device or Simulator model, orientation,
-   page layout and exact reproduction steps. Choose the supported version matrix
-   through the browser-policy issue.
+   page layout and exact reproduction steps. Resolve exact versions from the
+   [browser-policy target matrix](BROWSER-SUPPORT.md#browser-and-version-targets).
 2. Build a reduced fixture and compare expected classes/callbacks with actual
    behaviour. Exercise top/bottom boundaries, touch scrolling and inertia,
    portrait/landscape changes and browser toolbar expansion/collapse where the

@@ -75,6 +75,8 @@ for details, including re-initialisation and freeze behaviour.
 - [Installation](docs/INSTALLATION.md): packed dependency, ESM, CommonJS,
   classic scripts, TypeScript and local example.
 - [Planned work and migration](docs/ROADMAP.md): requested changes and testing prerequisites.
+- [Browser support policy](docs/BROWSER-SUPPORT.md): version targets, verified
+  environments, required checks and mobile blockers.
 - [Maintenance evidence](docs/MAINTENANCE.md) and [security review](docs/SECURITY-REVIEW.md).
 - [Public project board](https://github.com/users/JHCodeQuest/projects/7/views/1)
   and [issues](https://github.com/JHCodeQuest/headroom.js/issues).
@@ -101,14 +103,20 @@ This runs lint, builds the bundles and TypeScript example, checks CommonJS/ESM
 imports and strict type consumers, then runs the Chrome browser tests.
 `npm start` builds and opens the interactive Cypress runner.
 
-The maintenance baseline at
-[`777cd46`](https://github.com/JHCodeQuest/headroom.js/commit/777cd46797052881c09c8cb8340da998d811ff06)
-passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39442262856),
-including 21 Chrome tests and two package-import tests. Local baseline checks ran
-on Windows with Node 24 and Chrome. This evidence is specific to that revision;
-check the current PR's CI for later changes. Firefox, Safari and physical iOS
-remain unverified. Node requirements describe development tooling, not a promise
-of equivalent browser support.
+The maintained runtime at
+[`a3eb455`](https://github.com/JHCodeQuest/headroom.js/commit/a3eb455a737a26e2731993e9862e1aefadcd2825)
+passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39452518979),
+including 24 Chrome tests and four package tests. Local Chrome checks also passed
+on Windows with Node 24. Evidence applies to the recorded revision/environment;
+check the current PR's CI for later changes.
+
+Our rolling maintenance targets cover the latest two stable Chrome, Edge and
+Firefox desktop majors, current/previous Safari majors on supported macOS,
+current/previous iOS/iPadOS majors and the latest two Chrome majors on supported
+Android. These are targets, not a claim the whole matrix has passed. See the
+[policy and evidence table](docs/BROWSER-SUPPORT.md) for exact version rules,
+unverified combinations and the iOS testing blocker. Development Node requirements
+do not define browser runtime support.
 
 ## Contributing
 

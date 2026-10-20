@@ -62,15 +62,22 @@ custom containers, iframe windows, lifecycle cleanup and the ESM example.
 The support-flag checks cover SSR imports, alias writes in both module formats,
 isolated missing-feature environments and browser initialisation overrides.
 
-The baseline revision
-[`777cd46`](https://github.com/JHCodeQuest/headroom.js/commit/777cd46797052881c09c8cb8340da998d811ff06)
-passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39442262856).
-Local baseline checks used Windows, Node 24 and Chrome. These results apply to
-that revision; use the current PR's check results for subsequent changes.
+The maintained runtime revision
+[`a3eb455`](https://github.com/JHCodeQuest/headroom.js/commit/a3eb455a737a26e2731993e9862e1aefadcd2825)
+passed [Linux CI on Node 22 and 24](https://github.com/JHCodeQuest/headroom.js/actions/runs/39452518979),
+including all 24 Chrome tests. Local Chrome checks used Windows and Node 24.
+These results apply to their recorded revision; use the current PR's checks for
+subsequent changes.
 
-Firefox, Safari and physical mobile devices remain unverified. Browser policy
-is planned in [#7](https://github.com/JHCodeQuest/headroom.js/issues/7). Development
-Node versions do not define browser support. Follow the
+While defining the policy, the existing 24 browser tests also passed locally in
+Edge 155 on Windows against the same unchanged runtime. This adds desktop
+automation evidence, not visual, mobile or full-matrix verification. The exact
+version and limits are recorded in the policy's evidence table.
+
+The [browser support policy](BROWSER-SUPPORT.md) now defines rolling version
+targets, exact environment evidence and required desktop/mobile checks. It does
+not turn untested Firefox, Safari or mobile targets into passing results.
+Development Node versions do not define browser runtime support. Follow the
 [mobile validation plan](ROADMAP.md#mobile-validation-plan) before claiming an
 iOS fix; desktop emulation does not replace Simulator/device evidence.
 
