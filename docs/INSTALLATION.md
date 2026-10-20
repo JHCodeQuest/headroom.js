@@ -5,6 +5,10 @@ but is not published to npm. Installing that name from the registry or using
 upstream CDN links installs upstream, not this maintenance update. `private: true`
 prevents accidental npm publication; it does not prevent a local package archive.
 
+The current fork replaces upstream callback options with element events. Read
+the [breaking-change migration](API.md#migrating-callback-consumers) before
+updating a consumer, even though the baseline metadata version is still `0.12.0`.
+
 ## Build the checkout
 
 Use Node 22.13+, 24 or 26+ and npm:

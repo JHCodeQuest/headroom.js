@@ -18,9 +18,18 @@ new MinifiedHeadroom(document.createElement("header")).init().destroy();
 
 const hr = new Headroom(document.createElement("header"), {
   scroller: document.createElement("main"),
-  offset: { up: 20, down: 50 },
-  onUnpin() { this.pin(); }
+  offset: { up: 20, down: 50 }
 });
 hr.init().destroy();
 // @ts-expect-error Both scroll directions are required.
 new Headroom(document.createElement("header"), { offset: { up: 2 } });
+
+document.createElement("header").addEventListener("headroom:unpin", event => {
+  const owner: Headroom = event.detail.headroom;
+  owner.pin();
+});
+const listener = (event: Headroom.EventMap["headroom:bottom"]) => event.detail.headroom.freeze();
+document.addEventListener("headroom:bottom", listener);
+document.removeEventListener("headroom:bottom", listener);
+// @ts-expect-error Callback options were replaced by element events.
+new Headroom(document.createElement("header"), { onUnpin() {} });

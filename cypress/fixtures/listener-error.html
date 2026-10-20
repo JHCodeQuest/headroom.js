@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Synthetic event error fixture</title>
+    <script src="../../dist/headroom.js"></script>
+    <script>
+      window.listenerFailure = new Error("Synthetic listener failure");
+      window.throwListener = function() { throw window.listenerFailure; };
+    </script>
+  </head>
+  <body><header>Event error fixture</header></body>
+</html>

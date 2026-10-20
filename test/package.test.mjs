@@ -42,15 +42,22 @@ test("both module formats keep support flag overrides synchronized", async () =>
 test("browser bundles load with false flags when a required feature is absent", () => {
   for (const bundle of ["headroom.js", "headroom.min.js"]) {
     const source = readFileSync(new URL(`../dist/${bundle}`, import.meta.url), "utf8");
+    const supported = vm.createContext({
+      window: { CustomEvent() {} }, document: { documentElement: { classList: {} } },
+      requestAnimationFrame() {}
+    });
+    vm.runInContext(source, supported);
+    assert.equal(supported.Headroom.isSupported, true);
     for (const removal of [
       "delete globalThis.requestAnimationFrame",
       "Object.assign = undefined",
       "Object.keys = undefined",
       "Function.prototype.bind = undefined",
-      "delete document.documentElement.classList"
+      "delete document.documentElement.classList",
+      "delete window.CustomEvent"
     ]) {
       const context = vm.createContext({
-        window: {}, document: { documentElement: { classList: {} } },
+        window: { CustomEvent() {} }, document: { documentElement: { classList: {} } },
         requestAnimationFrame() {}
       });
       vm.runInContext(removal, context);
@@ -63,6 +70,36 @@ test("browser bundles load with false flags when a required feature is absent", 
         } });
         assert.equal(hr.init(), hr);
         assert.equal(hr.initialised, false);
+      }
+    }
+  }
+});
+
+test("removed callback options fail with migration guidance in both module formats", async () => {
+  const { default: ESHeadroom } = await import("headroom.js");
+  const names = ["onPin", "onUnpin", "onTop", "onNotTop", "onBottom", "onNotBottom"];
+  for (const Constructor of [require("headroom.js"), ESHeadroom]) {
+    for (const name of names) {
+      const message = new RegExp(`${name}.*headroom:`);
+      for (const options of [
+        { [name]: () => {} }, { [name]: undefined },
+        Object.create({ [name]: () => {} }),
+        Object.defineProperty({}, name, { value: undefined })
+      ]) {
+        assert.throws(() => new Constructor({}, options), message);
+      }
+      const defaults = Constructor.options;
+      for (const overrides of [
+        { [name]: () => {} }, { [name]: undefined },
+        Object.create({ [name]: undefined }),
+        Object.defineProperty({}, name, { value: undefined })
+      ]) {
+        Constructor.options = overrides;
+        try {
+          assert.throws(() => new Constructor({}), message);
+        } finally {
+          Constructor.options = defaults;
+        }
       }
     }
   }

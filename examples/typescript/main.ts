@@ -5,6 +5,15 @@ if (!header) {
   throw new Error("The demo requires a header element.");
 }
 
+const status = document.querySelector<HTMLElement>("#header-state");
+const showPin = () => {
+  if (status) status.textContent = "Header revealed";
+};
+const showUnpin = (event: Headroom.EventMap["headroom:unpin"]) => {
+  if (status) status.textContent = event.detail.headroom.initialised ? "Header hidden" : "Header inactive";
+};
+header.addEventListener("headroom:pin", showPin);
+header.addEventListener("headroom:unpin", showUnpin);
 const headroom = new Headroom(header, { tolerance: 5, offset: 60 }).init();
 const toggle = document.querySelector<HTMLButtonElement>("#toggle");
 if (toggle) {
@@ -12,10 +21,18 @@ if (toggle) {
     if (headroom.initialised) {
       headroom.destroy();
       toggle.textContent = "Enable header behaviour";
+      if (status) status.textContent = "Header inactive";
     } else {
       headroom.init();
       toggle.textContent = "Disable header behaviour";
+      if (status) status.textContent = "Header tracking enabled";
     }
   });
 }
-window.addEventListener("pagehide", () => headroom.destroy(), { once: true });
+window.addEventListener("pagehide", event => {
+  if (!event.persisted) {
+    header.removeEventListener("headroom:pin", showPin);
+    header.removeEventListener("headroom:unpin", showUnpin);
+    headroom.destroy();
+  }
+});

@@ -12,7 +12,7 @@ ownership, progress, bugs, blockers and completion through linked issues and PRs
 | Documentation | Guides for the existing API and unpublished fork. | [#1](https://github.com/JHCodeQuest/headroom.js/issues/1): keep documentation aligned with verified behaviour. |
 | Initialisation | Constructor followed by `init()`; tracking starts after a 100 ms timer. | [#2](https://github.com/JHCodeQuest/headroom.js/issues/2): decide whether to make setup synchronous; [#3](https://github.com/JHCodeQuest/headroom.js/issues/3): evaluate a function API. |
 | Support detection and policy | Static boolean `Headroom.isSupported`, with deprecated, synchronized `cutsTheMustard` alias; documented [browser/version policy](BROWSER-SUPPORT.md). | [#4](https://github.com/JHCodeQuest/headroom.js/issues/4): additive naming migration implemented; [#7](https://github.com/JHCodeQuest/headroom.js/issues/7): policy defined, with remaining platform verification explicitly pending. |
-| State notifications | Six instance callbacks. | [#5](https://github.com/JHCodeQuest/headroom.js/issues/5): replace callbacks with events emitted on the element. |
+| State notifications | Six synchronous `headroom:*` element events; removed callback options raise a migration error. | [#5](https://github.com/JHCodeQuest/headroom.js/issues/5): event replacement implemented; see the [breaking-change migration](API.md#migrating-callback-consumers). |
 | State naming | `pin`/`unpin` methods and pinned/unpinned classes. | [#22](https://github.com/JHCodeQuest/headroom.js/issues/22): plan the breaking `up`/`down` API change. |
 | Freeze | All scroll-driven state changes stop while frozen. | [#8](https://github.com/JHCodeQuest/headroom.js/issues/8): freeze pin state independently of top/not-top changes. |
 | Offsets | Numeric or separate `{ up, down }` values at construction. | [#10](https://github.com/JHCodeQuest/headroom.js/issues/10): dynamic configuration; [#21](https://github.com/JHCodeQuest/headroom.js/issues/21): investigate directional top/not-top reports. Existing Chrome tests cover both offset orderings; the reported bug has not been reproduced there. |
@@ -28,12 +28,12 @@ adapter errors or historical mobile reports are fixed.
 
 ## Migration dependencies
 
-Decide the event contract, state names and lifecycle changes before adapting
-framework wrappers to them. Specify event names, payload, bubbling, callback
-compatibility and removal policy in the relevant issue before implementation.
-Existing consumers must continue to follow the current API until a documented
-migration is delivered. No automatic callback-to-event or pin-to-up mapping
-exists today.
+The [event contract and callback migration](API.md#element-events-and-class-transitions)
+are defined. Framework wrappers must subscribe on the element, use
+`detail.headroom` and remove subscriptions during teardown; old callback options
+are rejected rather than automatically mapped. Decide remaining state-name and
+lifecycle changes before adapting wrappers to those changes. The pin-to-up rename
+is still planned, with no automatic mapping today.
 
 Support detection has an additive migration: replace reads/writes of
 `Headroom.cutsTheMustard` with `Headroom.isSupported` (no parentheses). Both names
@@ -66,7 +66,7 @@ For each report:
 1. Record the affected iOS/Safari version, device or Simulator model, orientation,
    page layout and exact reproduction steps. Resolve exact versions from the
    [browser-policy target matrix](BROWSER-SUPPORT.md#browser-and-version-targets).
-2. Build a reduced fixture and compare expected classes/callbacks with actual
+2. Build a reduced fixture and compare expected classes/events with actual
    behaviour. Exercise top/bottom boundaries, touch scrolling and inertia,
    portrait/landscape changes and browser toolbar expansion/collapse where the
    environment supports them.

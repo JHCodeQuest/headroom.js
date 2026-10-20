@@ -1,6 +1,31 @@
 import { isBrowser, isSupported } from "./features";
 import trackScroll from "./trackScroll";
 
+var removedCallbacks = {
+  onPin: "pin", onUnpin: "unpin", onTop: "top", onNotTop: "not-top",
+  onBottom: "bottom", onNotBottom: "not-bottom"
+};
+
+function assertEventOptions(options) {
+  // Reject even undefined/inherited keys so an obsolete hook cannot disappear silently.
+  Object.keys(removedCallbacks).forEach(function(name) {
+    if (name in Object(options)) {
+      throw new TypeError(
+        "Headroom callback option " + name + " was removed; use headroom:" +
+        removedCallbacks[name] + " with element.addEventListener()."
+      );
+    }
+  });
+}
+
+function emit(instance, state) {
+  // Use the element's realm, including when it belongs to an iframe.
+  var view = instance.elem.ownerDocument.defaultView || window;
+  instance.elem.dispatchEvent(new view.CustomEvent("headroom:" + state, {
+    detail: { headroom: instance }, bubbles: true, cancelable: false, composed: false
+  }));
+}
+
 function normalizeUpDown(t) {
   return t === Object(t) ? t : { down: t, up: t };
 }
@@ -10,11 +35,14 @@ function normalizeUpDown(t) {
  * Hides header when scrolling down
  * Shows header when scrolling up
  * @constructor
- * @param {DOMElement} elem the header element
- * @param {Object} options options for the widget
+ * @param {HTMLElement} elem the header element
+ * @param {Object} options options for the widget; subscribe to state events on elem
+ * @throws {TypeError} when removed callback keys are supplied in options or defaults
  */
 function Headroom(elem, options) {
   options = options || {};
+  assertEventOptions(Headroom.options);
+  assertEventOptions(options);
   Object.assign(this, Headroom.options, options);
   this.classes = Object.assign({}, Headroom.options.classes, options.classes);
 
@@ -48,7 +76,7 @@ Headroom.prototype = {
             { offset: self.offset, tolerance: self.tolerance },
             self.update.bind(self)
           );
-          // Store the tracker before callbacks run: a callback may destroy us.
+          // Store the tracker before listeners run: a listener may destroy us.
           self.scrollTracker.update();
         },
         100,
@@ -84,9 +112,7 @@ Headroom.prototype = {
       this.addClass("unpinned");
       this.removeClass("pinned");
 
-      if (this.onUnpin) {
-        this.onUnpin.call(this);
-      }
+      emit(this, "unpin");
     }
   },
 
@@ -99,9 +125,7 @@ Headroom.prototype = {
       this.addClass("pinned");
       this.removeClass("unpinned");
 
-      if (this.onPin) {
-        this.onPin.call(this);
-      }
+      emit(this, "pin");
     }
   },
 
@@ -128,9 +152,7 @@ Headroom.prototype = {
       this.addClass("top");
       this.removeClass("notTop");
 
-      if (this.onTop) {
-        this.onTop.call(this);
-      }
+      emit(this, "top");
     }
   },
 
@@ -139,9 +161,7 @@ Headroom.prototype = {
       this.addClass("notTop");
       this.removeClass("top");
 
-      if (this.onNotTop) {
-        this.onNotTop.call(this);
-      }
+      emit(this, "not-top");
     }
   },
 
@@ -150,9 +170,7 @@ Headroom.prototype = {
       this.addClass("bottom");
       this.removeClass("notBottom");
 
-      if (this.onBottom) {
-        this.onBottom.call(this);
-      }
+      emit(this, "bottom");
     }
   },
 
@@ -161,9 +179,7 @@ Headroom.prototype = {
       this.addClass("notBottom");
       this.removeClass("bottom");
 
-      if (this.onNotBottom) {
-        this.onNotBottom.call(this);
-      }
+      emit(this, "not-bottom");
     }
   },
 
@@ -216,8 +232,8 @@ Headroom.prototype = {
       this.notTop();
     }
 
-    // Public callbacks may synchronously destroy the widget.
-    if (!this.initialised || this.generation !== generation) {
+    // Event listeners may synchronously destroy, restart or freeze the widget.
+    if (!this.initialised || this.generation !== generation || this.frozen === true) {
       return;
     }
 
@@ -227,7 +243,7 @@ Headroom.prototype = {
       this.notBottom();
     }
 
-    if (!this.initialised || this.generation !== generation) {
+    if (!this.initialised || this.generation !== generation || this.frozen === true) {
       return;
     }
 

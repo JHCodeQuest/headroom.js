@@ -259,29 +259,18 @@ describe("Headroom", function() {
       .should("not.be.bottom");
   });
 
-  it("fires callbacks", () => {
+  it("fires element events while scrolling", () => {
     let pinStatus, topStatus, bottomStatus;
 
-    initialiseHeadroom({
-      onPin: () => {
-        pinStatus = "pinned";
-      },
-      onUnpin: () => {
-        pinStatus = "unpinned";
-      },
-      onTop: () => {
-        topStatus = "top";
-      },
-      onNotTop: () => {
-        topStatus = "notTop";
-      },
-      onBottom: () => {
-        bottomStatus = "bottom";
-      },
-      onNotBottom: () => {
-        bottomStatus = "notBottom";
-      }
+    cy.get("header").then(([header]) => {
+      header.addEventListener("headroom:pin", () => { pinStatus = "pinned"; });
+      header.addEventListener("headroom:unpin", () => { pinStatus = "unpinned"; });
+      header.addEventListener("headroom:top", () => { topStatus = "top"; });
+      header.addEventListener("headroom:not-top", () => { topStatus = "notTop"; });
+      header.addEventListener("headroom:bottom", () => { bottomStatus = "bottom"; });
+      header.addEventListener("headroom:not-bottom", () => { bottomStatus = "notBottom"; });
     });
+    initialiseHeadroom();
 
     cy.wait(0).should(() => {
       expect(topStatus).to.equal("top");

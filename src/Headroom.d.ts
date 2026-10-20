@@ -20,12 +20,20 @@ declare namespace Headroom {
     offset?: number | UpDown;
     scroller?: Window | HTMLElement;
     classes?: Partial<Classes>;
-    onPin?: (this: Headroom) => void;
-    onUnpin?: (this: Headroom) => void;
-    onTop?: (this: Headroom) => void;
-    onNotTop?: (this: Headroom) => void;
-    onBottom?: (this: Headroom) => void;
-    onNotBottom?: (this: Headroom) => void;
+  }
+
+  /** State notification payload. Subscribe on the element before init(). */
+  interface EventDetail {
+    headroom: Headroom;
+  }
+
+  interface EventMap {
+    "headroom:pin": CustomEvent<EventDetail>;
+    "headroom:unpin": CustomEvent<EventDetail>;
+    "headroom:top": CustomEvent<EventDetail>;
+    "headroom:not-top": CustomEvent<EventDetail>;
+    "headroom:bottom": CustomEvent<EventDetail>;
+    "headroom:not-bottom": CustomEvent<EventDetail>;
   }
 
   interface Defaults {
@@ -80,6 +88,11 @@ declare class Headroom {
   shouldPin(details: Headroom.ScrollDetails): boolean;
   shouldUnpin(details: Headroom.ScrollDetails): boolean;
   update(details: Headroom.ScrollDetails): void;
+}
+
+declare global {
+  interface HTMLElementEventMap extends Headroom.EventMap {}
+  interface DocumentEventMap extends Headroom.EventMap {}
 }
 
 export default Headroom;

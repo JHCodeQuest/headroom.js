@@ -1,7 +1,8 @@
 # Current API reference
 
-This describes the maintained 0.12 API as implemented in `src/Headroom.js` and its
-scroll tracker. It does not describe the proposed v1 API. See the
+This describes the current fork API in `src/Headroom.js` and its scroll tracker.
+Element events replace the upstream 0.12 callbacks: this is an unpublished breaking
+change, not an official upstream v1 release. See the
 [roadmap](ROADMAP.md) for planned changes.
 
 ## Constructor and feature detection
@@ -16,9 +17,10 @@ element and its scroll container exist in the browser.
 
 `Headroom.isSupported` is a static **boolean**, not a function. Its initial value
 is computed when the module loads. The feature check uses `classList`,
-`Function.prototype.bind`, `Object.assign`, `Object.keys` and a callable
-`requestAnimationFrame`. A missing animation-frame API reports false instead
-of throwing while the module loads. The package can be imported on the server
+`Function.prototype.bind`, `Object.assign`, `Object.keys`, a callable
+`requestAnimationFrame` and `window.CustomEvent`. Missing animation-frame or
+CustomEvent APIs report false instead of throwing while the module loads.
+The package can be imported on the server
 without a DOM, where the flag is false and the default scroller is null. Header
 behaviour belongs in the browser, not during server rendering.
 
@@ -63,7 +65,7 @@ The defaults in a browser are:
 }
 ```
 
-No callbacks are configured by default.
+Callback options have been removed; subscribe to the element events below.
 
 | Option | Accepted value | Behaviour |
 | --- | --- | --- |
@@ -71,7 +73,6 @@ No callbacks are configured by default.
 | `tolerance` | Number, or `{ up: number, down: number }` | Minimum movement for a direction-driven pin change. The measured distance must be **greater than** the direction's tolerance. Top state can still pin the header. |
 | `scroller` | `Window` or `HTMLElement` | Event source and scroll-position provider; defaults to the browser window. Element scrollers must actually overflow and emit native scroll events. An iframe's window is also supported by the existing Chrome tests. |
 | `classes` | Partial object using the eight keys above | Overrides individual default class names; unspecified keys retain their defaults. Use non-empty names, with single spaces between multiple class tokens. |
-| `onPin`, `onUnpin`, `onTop`, `onNotTop`, `onBottom`, `onNotBottom` | Functions | Called on the corresponding state transition; details below. |
 
 Supply finite, non-negative pixel values and both `up` and `down` when using an
 object. This is a caller requirement; the runtime does not provide comprehensive
@@ -103,51 +104,105 @@ A virtual scrolling system that translates content without native scroll
 position/events is not supported merely by passing its container. Locomotive
 Scroll integration is tracked in [#9](https://github.com/JHCodeQuest/headroom.js/issues/9).
 
-## Callbacks and class transitions
+## Element events and class transitions
 
-Callbacks receive no arguments. A regular function's `this` is the Headroom
-instance. An arrow function keeps its lexical `this` and should not be used when
-the callback needs the instance binding.
+Subscribe before `init()` to observe initial notifications. Each transition
+dispatches a synchronous `CustomEvent` on the managed element **after** updating
+its class pair. `event.detail.headroom` is the originating instance; there is no
+scroll-position payload. Event names use lowercase words and hyphens exactly as
+shown; class customisation does not rename events.
 
 ```ts
 import Headroom from "headroom.js";
 
 const header = document.querySelector<HTMLElement>("header");
 if (header && Headroom.isSupported) {
-  const options: Headroom.Options = {
-    onUnpin() { console.log(this.initialised); },
-    onTop() { console.log("At the current direction's top boundary"); }
+  const onUnpin = (event: Headroom.EventMap["headroom:unpin"]) => {
+    console.log(event.detail.headroom.initialised);
   };
-  const headroom = new Headroom(header, options).init();
+  header.addEventListener("headroom:unpin", onUnpin);
+  const headroom = new Headroom(header).init();
   window.addEventListener("pagehide", event => {
-    if (!event.persisted) headroom.destroy();
+    if (!event.persisted) {
+      header.removeEventListener("headroom:unpin", onUnpin);
+      headroom.destroy();
+    }
   });
 }
 ```
 
-| Callback | State class added | Opposite class removed |
+In a component's unmount cleanup, remove its subscriptions and destroy its
+instance. Also remove any page listener owned by that component. `destroy()`
+does not remove application listeners, so subscriptions can survive an intentional
+destroy/re-init cycle. HTMLElement and Document listeners infer the custom event
+type; `Headroom.EventMap` and `Headroom.EventDetail` are also available explicitly.
+For delegated listeners, use `event.target` or `event.detail.headroom.elem` to
+identify the originating header; `currentTarget` is the subscribed ancestor.
+
+| Event | State class added | Opposite class removed |
 | --- | --- | --- |
-| `onPin` | `pinned` | `unpinned` |
-| `onUnpin` | `unpinned` | `pinned` |
-| `onTop` | `top` | `notTop` |
-| `onNotTop` | `notTop` | `top` |
-| `onBottom` | `bottom` | `notBottom` |
-| `onNotBottom` | `notBottom` | `bottom` |
+| `headroom:pin` | `pinned` | `unpinned` |
+| `headroom:unpin` | `unpinned` | `pinned` |
+| `headroom:top` | `top` | `notTop` |
+| `headroom:not-top` | `notTop` | `top` |
+| `headroom:bottom` | `bottom` | `notBottom` |
+| `headroom:not-bottom` | `notBottom` | `bottom` |
 
-The names in this table are keys in `classes`. Classes are updated before the
-callback. Repeated requests for an unchanged state do not repeatedly call that
-state's callback. Initial scroll evaluation can invoke top/not-top and
-bottom/not-bottom callbacks. It does not guarantee an initial `onPin` call or
-that a pinned/unpinned class has already been added.
+The state names are keys in `classes`. Events bubble to ancestors within their
+DOM tree (`bubbles: true`), do not cross shadow-root boundaries (`composed: false`)
+and are non-cancelable (`cancelable: false`). `preventDefault()` cannot veto a
+completed class transition. They are programmatic notifications, not trusted
+user input or an authorisation boundary. The detail contains a live instance
+reference, not a frozen snapshot; applications should not mutate the payload.
 
-During a scroll update, top state is evaluated first, bottom state next, and pin
-state last. Destruction in a state callback cancels tracking and stops the
-obsolete update from applying later states, including when that callback
-immediately re-initialises the instance. Callback exceptions are not caught by
-the library; keep callback handling appropriate to the application.
+Repeated requests for an unchanged state do not emit again. Initial evaluation
+can emit top/not-top and bottom/not-bottom; it does not fabricate an initial pin
+event or guarantee an initial pinned/unpinned class. Each scroll update evaluates
+top, then bottom, then pin state. Only states that change emit notifications.
 
-The core currently emits **no DOM events** for these transitions. Callback
-replacement is planned in [#5](https://github.com/JHCodeQuest/headroom.js/issues/5).
+If a listener destroys or re-initialises the instance, later transitions from
+that obsolete scroll update stop. If it freezes the instance, remaining states
+in that update also stop. The event already dispatching still reaches its other
+listeners/ancestors under normal DOM rules; destruction does not retract it.
+Manual state methods still work and emit while frozen. No events are emitted
+just for `destroy()`, `freeze()` or `unfreeze()`.
+
+Events are created with the managed element's window constructor, including
+iframe-owned elements. A document without a window uses the current browser
+window's constructor. DOM listener exceptions are reported by the browser and
+do not propagate through `dispatchEvent()` to the state-method caller; other
+listeners can still run. This differs from the former direct callbacks. See the
+[DOM dispatch reference](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent).
+
+## Migrating callback consumers
+
+Remove each callback option and subscribe on the element instead:
+
+| Removed option | Replacement subscription |
+| --- | --- |
+| `onPin` | `headroom:pin` |
+| `onUnpin` | `headroom:unpin` |
+| `onTop` | `headroom:top` |
+| `onNotTop` | `headroom:not-top` |
+| `onBottom` | `headroom:bottom` |
+| `onNotBottom` | `headroom:not-bottom` |
+
+Use `event.detail.headroom` where the old callback used `this`. A regular DOM
+listener's `this` is its current target, not the Headroom instance. Register before
+initialisation, remove listeners on view teardown, and update error handling for
+DOM dispatch semantics. Do not call an event as though it were an option function.
+
+The constructor throws a `TypeError` naming the replacement event if any removed
+option key is present in supplied options **or** `Headroom.options` defaults,
+including inherited/non-enumerable keys or values of `undefined`. Delete the key
+rather than setting it to undefined. There is no silent callback compatibility
+bridge. Existing adapters/custom wrappers that supply callbacks must migrate;
+their other integration issues remain tracked separately.
+
+The package remains private with baseline metadata version `0.12.0`; that number
+does not imply callback compatibility in this fork. No npm release/tag is created
+by this change. Consumers of a packed fork should rebuild/repack and update their
+application dependency deliberately before adopting the new event API.
 
 ## Lifecycle
 
@@ -155,8 +210,8 @@ replacement is planned in [#5](https://github.com/JHCodeQuest/headroom.js/issues
 | --- | --- | --- |
 | `init()` | The instance | If supported and not already initialised, adds `classes.initial` immediately and defers listener registration/initial scroll evaluation by about 100 ms, allowing browser-restored scroll positions to settle. Calling it twice does not add another tracker. |
 | `destroy()` | `undefined` | Cancels deferred setup, removes the scroll listener and queued animation frame, and removes all configured Headroom classes. Safe before initialisation, immediately after it, and when repeated. It does not remove the element or application-owned event listeners. |
-| `unpin()` | `undefined` | Enters the unpinned state and calls `onUnpin` when that state changes. Can enter it from the initial state. |
-| `pin()` | `undefined` | Changes an already-unpinned element to pinned and calls `onPin`. It does not add the pinned class to an element that has never entered the unpinned state. |
+| `unpin()` | `undefined` | Enters the unpinned state and emits `headroom:unpin` when that state changes. Can enter it from the initial state. |
+| `pin()` | `undefined` | Changes an already-unpinned element to pinned and emits `headroom:pin`. It does not add the pinned class to an element that has never entered the unpinned state. |
 | `freeze()` | `undefined` | Sets `frozen` and adds its class. All scroll-driven top/bottom/pin updates stop. |
 | `unfreeze()` | `undefined` | Clears `frozen` and its class. Tracking can update state on subsequent scroll events; it does not force an immediate state recalculation. |
 
@@ -176,7 +231,7 @@ new one. Dynamic offset support is planned in
 ## Other exposed helpers
 
 The declarations also expose `top()`, `notTop()`, `bottom()` and `notBottom()`.
-They apply those class transitions and callbacks directly. They do not measure
+They apply those class transitions and events directly. They do not measure
 scroll position, and manual calls do not obey the scroll-update freeze guard.
 
 `addClass(key)`, `removeClass(key)` and `hasClass(key)` use a key from
