@@ -219,6 +219,8 @@ From the fork checkout, run `npm run build` followed by `npm run demo`, then ope
 not repository internals. This example is local, not a hosted public demo.
 
 `npm run check` runs lint, build, package/type checks and Chrome browser tests.
-See the [maintenance evidence](MAINTENANCE.md#verification-evidence) for what has
-actually been verified and the [roadmap](ROADMAP.md#mobile-validation-plan) for
-the separate iOS validation prerequisites.
+See the [maintenance evidence](MAINTENANCE.md#verification-evidence) and
+[browser policy](BROWSER-SUPPORT.md) for verified environments, target version
+windows and per-browser commands. The [roadmap](ROADMAP.md#mobile-validation-plan)
+tracks the separate iOS validation prerequisites. A successful build or Node import
+does not establish browser compatibility.

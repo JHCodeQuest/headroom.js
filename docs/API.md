@@ -35,6 +35,10 @@ installing polyfills later does not automatically update it, and forcing it true
 does not supply missing browser APIs. Perform detection/polyfill setup before
 loading the module. Do not force it true during server rendering.
 
+The [browser support policy](BROWSER-SUPPORT.md) defines maintenance version
+targets and verified environments separately. A true flag does not establish
+platform compatibility; it does not test every runtime API, CSS or mobile behaviour.
+
 ## Options and defaults
 
 `Headroom.options` exposes the defaults. Configure an individual instance through
