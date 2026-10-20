@@ -25,6 +25,15 @@ The documentation update covers installation, the actual options and lifecycle,
 adapter limitations, planned migrations and testing prerequisites. It does not
 implement the roadmap or change runtime behaviour.
 
+## Support-flag migration
+
+The subsequent support-flag update adds the preferred static boolean
+`Headroom.isSupported` and retains `cutsTheMustard` as a deprecated, synchronized
+alias. Existing overrides through either name control future `init()` attempts.
+Missing `requestAnimationFrame` now produces a false flag without an import-time
+exception. This is an additive API change; it does not define a new browser
+support policy. See the [API reference](API.md#constructor-and-feature-detection).
+
 ## Upstream report triage
 
 The upstream open issues were inspected on 20 October 2026. These statuses
@@ -46,10 +55,12 @@ describe this fork; they do not close issues in the upstream project.
 ## Verification evidence
 
 Run `npm ci` and `npm run check` with supported Node and installed Chrome.
-The check lints, builds all artifacts, runs two package-import tests and strict
-ESM/CommonJS type-consumer checks, then runs 21 Chrome browser tests. Coverage
+The check lints, builds all artifacts, runs four package tests and strict
+ESM/CommonJS type-consumer checks, then runs 24 Chrome browser tests. Coverage
 includes scroll direction, both offset orderings, tolerance, callbacks, freeze,
 custom containers, iframe windows, lifecycle cleanup and the ESM example.
+The support-flag checks cover SSR imports, alias writes in both module formats,
+isolated missing-feature environments and browser initialisation overrides.
 
 The baseline revision
 [`777cd46`](https://github.com/JHCodeQuest/headroom.js/commit/777cd46797052881c09c8cb8340da998d811ff06)

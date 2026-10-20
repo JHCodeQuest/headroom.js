@@ -51,6 +51,9 @@ declare namespace Headroom {
 declare class Headroom {
   constructor(element: HTMLElement, options?: Headroom.Options);
   static options: Headroom.Defaults;
+  /** Feature-detection snapshot at module load; writable override used by init(). */
+  static isSupported: boolean;
+  /** @deprecated Use isSupported. Reads and writes share the same value. */
   static cutsTheMustard: boolean;
   elem: HTMLElement;
   initialised: boolean;

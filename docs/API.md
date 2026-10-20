@@ -14,12 +14,26 @@ Pass an existing `HTMLElement`, not a selector string. `options` is optional.
 Construction stores options; it does not start tracking. Call `init()` after the
 element and its scroll container exist in the browser.
 
-`Headroom.cutsTheMustard` is a boolean computed when the module loads. The current
-browser feature check uses `classList`, `Function.prototype.bind`, `Object.assign`,
-`Object.keys` and `requestAnimationFrame`. There is no public
-`Headroom.isSupported` property in this revision. The package can be imported on
-the server without a DOM, where the support flag is false and the default
-scroller is null. Header behaviour belongs in the browser, not during server rendering.
+`Headroom.isSupported` is a static **boolean**, not a function. Its initial value
+is computed when the module loads. The feature check uses `classList`,
+`Function.prototype.bind`, `Object.assign`, `Object.keys` and a callable
+`requestAnimationFrame`. A missing animation-frame API reports false instead
+of throwing while the module loads. The package can be imported on the server
+without a DOM, where the flag is false and the default scroller is null. Header
+behaviour belongs in the browser, not during server rendering.
+
+The legacy name `Headroom.cutsTheMustard` remains as a deprecated getter/setter
+alias: both names read and write the same value. Existing consumers can continue
+using it; new code should use `Headroom.isSupported`. There is no scheduled
+removal or runtime deprecation warning in this maintenance update.
+
+`init()` reads the current `isSupported` value. Setting either name to false
+disables subsequent initialisation attempts, but does not destroy instances
+already tracking. Re-enable the flag and call `init()` to start an instance whose
+initialisation was skipped. The flag is a module-load snapshot, not a live test:
+installing polyfills later does not automatically update it, and forcing it true
+does not supply missing browser APIs. Perform detection/polyfill setup before
+loading the module. Do not force it true during server rendering.
 
 ## Options and defaults
 
@@ -70,7 +84,7 @@ For a custom container:
 ```js
 const scroller = document.querySelector(".scroller");
 const header = document.querySelector("header");
-if (scroller && header && Headroom.cutsTheMustard) {
+if (scroller && header && Headroom.isSupported) {
   const headroom = new Headroom(header, {
     scroller,
     offset: { up: 20, down: 80 },
@@ -95,7 +109,7 @@ the callback needs the instance binding.
 import Headroom from "headroom.js";
 
 const header = document.querySelector<HTMLElement>("header");
-if (header && Headroom.cutsTheMustard) {
+if (header && Headroom.isSupported) {
   const options: Headroom.Options = {
     onUnpin() { console.log(this.initialised); },
     onTop() { console.log("At the current direction's top boundary"); }

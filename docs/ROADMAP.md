@@ -11,7 +11,7 @@ ownership, progress, bugs, blockers and completion through linked issues and PRs
 | --- | --- | --- |
 | Documentation | Guides for the existing API and unpublished fork. | [#1](https://github.com/JHCodeQuest/headroom.js/issues/1): keep documentation aligned with verified behaviour. |
 | Initialisation | Constructor followed by `init()`; tracking starts after a 100 ms timer. | [#2](https://github.com/JHCodeQuest/headroom.js/issues/2): decide whether to make setup synchronous; [#3](https://github.com/JHCodeQuest/headroom.js/issues/3): evaluate a function API. |
-| Support detection | Static `Headroom.cutsTheMustard`. | [#4](https://github.com/JHCodeQuest/headroom.js/issues/4): decide support-flag naming; [#7](https://github.com/JHCodeQuest/headroom.js/issues/7): define browser support and validation policy. |
+| Support detection | Static boolean `Headroom.isSupported`, with deprecated, synchronized `cutsTheMustard` alias. | [#4](https://github.com/JHCodeQuest/headroom.js/issues/4): additive naming migration implemented; [#7](https://github.com/JHCodeQuest/headroom.js/issues/7): browser support and validation policy remains planned. |
 | State notifications | Six instance callbacks. | [#5](https://github.com/JHCodeQuest/headroom.js/issues/5): replace callbacks with events emitted on the element. |
 | State naming | `pin`/`unpin` methods and pinned/unpinned classes. | [#22](https://github.com/JHCodeQuest/headroom.js/issues/22): plan the breaking `up`/`down` API change. |
 | Freeze | All scroll-driven state changes stop while frozen. | [#8](https://github.com/JHCodeQuest/headroom.js/issues/8): freeze pin state independently of top/not-top changes. |
@@ -34,6 +34,13 @@ compatibility and removal policy in the relevant issue before implementation.
 Existing consumers must continue to follow the current API until a documented
 migration is delivered. No automatic callback-to-event or pin-to-up mapping
 exists today.
+
+Support detection has an additive migration: replace reads/writes of
+`Headroom.cutsTheMustard` with `Headroom.isSupported` (no parentheses). Both names
+remain writable aliases for one boolean; changing the name does not change the
+feature check or retroactively disable existing instances. See the
+[API contract](API.md#constructor-and-feature-detection) for snapshot and override
+limits. No breaking removal is included in this update.
 
 The jQuery strategy and its packaging bug should be resolved together. Modern
 Angular and React wrappers should reuse the core and define mount/unmount

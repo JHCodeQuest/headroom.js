@@ -33,7 +33,7 @@ Headroom.prototype = {
    * @public
    */
   init: function() {
-    if (Headroom.cutsTheMustard && !this.initialised) {
+    if (Headroom.isSupported && !this.initialised) {
       this.generation++;
       this.addClass("initial");
       this.initialised = true;
@@ -262,6 +262,18 @@ Headroom.options = {
   }
 };
 
-Headroom.cutsTheMustard = isSupported();
+Headroom.isSupported = isSupported();
+
+// Keep existing support overrides working without two flags drifting apart.
+Object.defineProperty(Headroom, "cutsTheMustard", {
+  configurable: true,
+  enumerable: true,
+  get: function() {
+    return Headroom.isSupported;
+  },
+  set: function(value) {
+    Headroom.isSupported = value;
+  }
+});
 
 export default Headroom;

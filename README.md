@@ -38,7 +38,7 @@ use this in a browser application with a bundler:
 import Headroom from "headroom.js";
 
 const header = document.querySelector("header");
-if (header && Headroom.cutsTheMustard) {
+if (header && Headroom.isSupported) {
   const headroom = new Headroom(header, {
     offset: { up: 60, down: 100 },
     tolerance: { up: 5, down: 5 }
@@ -83,6 +83,11 @@ Current code retains callbacks and the `pin`/`unpin` API. Element events,
 `up`/`down` naming, dynamic configuration, pin-only freeze and framework/virtual
 scroll integrations are planned work. Legacy jQuery and AngularJS adapter source
 is retained but is not built or verified as a supported integration.
+
+Use the static boolean `Headroom.isSupported` for feature detection. The old
+`Headroom.cutsTheMustard` name is retained as a deprecated, synchronized alias;
+existing reads and overrides continue to work. See the
+[support-flag migration](docs/API.md#constructor-and-feature-detection).
 
 ## Development and verification
 
