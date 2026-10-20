@@ -1,5 +1,14 @@
 import Headroom from "headroom.js";
 
+const supported: boolean = Headroom.isSupported;
+const legacySupported: boolean = Headroom.cutsTheMustard;
+Headroom.isSupported = supported;
+Headroom.cutsTheMustard = legacySupported;
+// @ts-expect-error The support flag is a boolean, not a function.
+Headroom.isSupported();
+// @ts-expect-error Only boolean support overrides are accepted.
+Headroom.isSupported = "true";
+
 const element = document.createElement("header");
 const options: Headroom.Options = {
   tolerance: { up: 2, down: 5 },

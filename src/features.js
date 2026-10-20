@@ -32,6 +32,6 @@ export function isSupported() {
     "classList" in document.documentElement &&
     Object.assign &&
     Object.keys &&
-    requestAnimationFrame
+    typeof requestAnimationFrame === "function"
   );
 }

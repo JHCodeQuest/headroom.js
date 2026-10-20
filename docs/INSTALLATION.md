@@ -68,7 +68,7 @@ After the local archive is installed, use a normal bundler import:
 import Headroom from "headroom.js";
 
 const header = document.querySelector("header");
-if (header && Headroom.cutsTheMustard) {
+if (header && Headroom.isSupported) {
   const headroom = new Headroom(header).init();
   window.addEventListener("pagehide", event => {
     if (!event.persisted) headroom.destroy();
@@ -95,7 +95,7 @@ In a CommonJS application or browser bundle, require the constructor directly:
 ```js
 const Headroom = require("headroom.js");
 
-if (typeof document !== "undefined" && Headroom.cutsTheMustard) {
+if (typeof document !== "undefined" && Headroom.isSupported) {
   const header = document.querySelector("header");
   if (header) {
     const headroom = new Headroom(header).init();
@@ -140,7 +140,7 @@ is a complete `index.html` placed next to `vendor/`:
     <script type="module">
       import Headroom from "./vendor/headroom.mjs";
       const header = document.querySelector("header");
-      if (header && Headroom.cutsTheMustard) {
+      if (header && Headroom.isSupported) {
         const headroom = new Headroom(header).init();
         window.addEventListener("pagehide", event => {
           if (!event.persisted) headroom.destroy();
@@ -179,7 +179,7 @@ both after the header element:
     <script src="./vendor/headroom.min.js"></script>
     <script>
       const header = document.querySelector("header");
-      if (header && Headroom.cutsTheMustard) {
+      if (header && Headroom.isSupported) {
         const headroom = new Headroom(header).init();
         window.addEventListener("pagehide", event => {
           if (!event.persisted) headroom.destroy();
@@ -199,7 +199,7 @@ with a bundler can use:
 import Headroom from "headroom.js";
 
 const header = document.querySelector<HTMLElement>("header");
-if (header && Headroom.cutsTheMustard) {
+if (header && Headroom.isSupported) {
   const options: Headroom.Options = { offset: { up: 40, down: 80 }, tolerance: 5 };
   const headroom = new Headroom(header, options).init();
   window.addEventListener("pagehide", event => {
